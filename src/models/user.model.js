@@ -87,14 +87,14 @@ const userSchema = new mongoose.Schema({
 //     return await bcrypt.compare(password, this.password)
 // }
 
-userSchema.methods.generateJWT = function () {
+// userSchema.methods.generateJWT = function () {
 
-    return jwt.sign(
-        { id: this._id, email: this.email, role: this.role },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE || "1d" }
-    )
-}
+//     return jwt.sign(
+//         { id: this._id, email: this.email, role: this.role },
+//         process.env.JWT_SECRET,
+//         { expiresIn: process.env.JWT_EXPIRE || "1d" }
+//     )
+// }
 
 userSchema.virtual("bmi").get(function () {
 
@@ -117,8 +117,6 @@ userSchema.set("toJSON", {
         return ret
     }
 })
-
-userSchema.index({ email: 1 })
 
 const User = mongoose.model("User", userSchema)
 

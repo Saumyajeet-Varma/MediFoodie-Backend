@@ -2,6 +2,10 @@ import bcrypt from "bcrypt"
 import crypto from "crypto"
 import nodemailer from "nodemailer"
 import UserModel from "../models/user.model.js"
+import jwt from "jsonwebtoken"
+import dotenv from "dotenv"
+
+dotenv.config()
 
 export const registerUser = async (req, res) => {
     try {
@@ -40,8 +44,8 @@ export const registerUser = async (req, res) => {
         res.status(200).json({ success: true, message: "Successfully registered, Check your email for verification link" })
     }
     catch (err) {
-        console.error(err)
-        res.status(500).json({ success: false, error: err })
+        console.error(err);
+        res.status(500).json({ success: false, error: err });
     }
 }
 
@@ -64,6 +68,44 @@ export const verifyMail = async (req, res) => {
     }
     catch (err) {
         console.error(err);
-        res.status(500).json({ success: false, error: err })
+        res.status(500).json({ success: false, error: err });
+    }
+}
+
+export const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: "Invalid Credentials" });
+        }
+
+        const user = await UserModel.findOne({ email })
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" });
+        }
+
+        if (!user.isVerified) {
+            return res.status(403).json({ message: "Please verify your email first" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password)
+
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: "Invalid Credentials" });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRE }
+        )
+
+        res.status(200).json({ success: true, message: "User logged in successfully", token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, error: err });
     }
 }
