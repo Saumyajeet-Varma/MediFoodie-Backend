@@ -1,11 +1,8 @@
 import bcrypt from "bcrypt"
 import crypto from "crypto"
+import jwt from "jsonwebtoken"
 import nodemailer from "nodemailer"
 import UserModel from "../models/user.model.js"
-import jwt from "jsonwebtoken"
-import dotenv from "dotenv"
-
-dotenv.config()
 
 export const registerUser = async (req, res) => {
     try {
@@ -87,7 +84,7 @@ export const loginUser = async (req, res) => {
         }
 
         if (!user.isVerified) {
-            return res.status(403).json({ message: "Please verify your email first" });
+            return res.status(403).json({ success: false, message: "Please verify your email first" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password)
@@ -103,6 +100,17 @@ export const loginUser = async (req, res) => {
         )
 
         res.status(200).json({ success: true, message: "User logged in successfully", token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, error: err });
+    }
+}
+
+export const getUserProfile = async (req, res) => {
+    try {
+        const user = req.user;
+        res.status(200).json({ success: true, message: "User data fetched", user })
     }
     catch (err) {
         console.log(err);
