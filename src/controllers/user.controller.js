@@ -99,6 +99,13 @@ export const loginUser = async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRE }
         )
 
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 24 * 60 * 60 * 100
+        })
+
         res.status(200).json({ success: true, message: "User logged in successfully", token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
     }
     catch (err) {
@@ -111,6 +118,22 @@ export const getUserProfile = async (req, res) => {
     try {
         const user = req.user;
         res.status(200).json({ success: true, message: "User data fetched", user })
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, error: err });
+    }
+}
+
+export const logoutUser = async (req, res) => {
+    try {
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict"
+        })
+
+        res.status(200).json({ success: true, message: "Logged out successfully" });
     }
     catch (err) {
         console.log(err);
