@@ -14,6 +14,12 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: "User already exist" })
         }
 
+        const sameName = await UserModel.findOne({ name })
+
+        if (sameName) {
+            return res.status(400).json({ success: false, message: "Name has already been taken" })
+        }
+
         const hashedPassword = await bcrypt.hash(password, Number(process.env.HASH_ROUND) || 10)
         const verificationToken = crypto.randomBytes(32).toString("hex")
 
@@ -33,9 +39,9 @@ export const registerUser = async (req, res) => {
             from: `"MediFoodie" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: "Verify your email",
-            html: `<p>Hello ${name},</p>
+            html: `<h2>Hello ${name},</h2>
                    <p>Click the link below to verify your email:</p>
-                   <a href="${verifyUrl}">Verify</a>`,
+                   <a href="${verifyUrl}"><button>Verify</button></a>`,
         })
 
         res.status(200).json({ success: true, message: "Successfully registered, Check your email for verification link" })
@@ -117,7 +123,13 @@ export const loginUser = async (req, res) => {
 export const getUserProfile = async (req, res) => {
     try {
         const user = req.user;
-        res.status(200).json({ success: true, message: "User data fetched", user })
+        const { name } = req.params;
+
+        if (name !== user.name) {
+            return res.status(400).json({ success: false, message: "Invalid user in URL" })
+        }
+
+        res.status(200).json({ success: true, message: "User data fetched", user, name })
     }
     catch (err) {
         console.log(err);

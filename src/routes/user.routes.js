@@ -10,7 +10,7 @@ router.get("/verify/:token", verifyMail)
 
 router.post("/login", loginUser)
 
-router.get("/profile", authMiddleware, getUserProfile)
+router.get("/profile/:name", authMiddleware, getUserProfile)
 
 router.post("/logout", authMiddleware, logoutUser)
 
