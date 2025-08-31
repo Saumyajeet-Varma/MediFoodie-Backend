@@ -120,23 +120,6 @@ export const loginUser = async (req, res) => {
     }
 }
 
-export const getUserProfile = async (req, res) => {
-    try {
-        const user = req.user;
-        const { name } = req.params;
-
-        if (name !== user.name) {
-            return res.status(400).json({ success: false, message: "Invalid user in URL" })
-        }
-
-        res.status(200).json({ success: true, message: "User data fetched", user, name })
-    }
-    catch (err) {
-        console.log(err);
-        res.status(500).json({ success: false, error: err });
-    }
-}
-
 export const logoutUser = async (req, res) => {
     try {
         res.clearCookie("token", {
@@ -146,6 +129,85 @@ export const logoutUser = async (req, res) => {
         })
 
         res.status(200).json({ success: true, message: "Logged out successfully" });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, error: err });
+    }
+}
+
+export const getUserProfile = async (req, res) => {
+    try {
+        const user = req.user;
+        // const { name } = req.params;
+
+        // if (name !== user.name) {
+        //     return res.status(400).json({ success: false, message: "Invalid user in URL" })
+        // }
+
+        res.status(200).json({ success: true, message: "User data fetched", user })
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, error: err });
+    }
+}
+
+export const updateUserProfile = async (req, res) => {
+    try {
+        const user = req.user
+        const { name, age, gender, height, weight, healthConditions, healthGoal, activityLevel } = req.body
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" })
+        }
+
+        if (name) {
+            const sameName = await UserModel.findOne({ name })
+
+            if (sameName) {
+                return res.status(400).json({ success: false, message: "Name has already been taken" })
+            }
+
+            user.name = name
+        }
+
+        if (age) {
+            user.age = age
+        }
+
+        if (gender) {
+            user.gender = gender
+        }
+
+        if (height) {
+            user.height = height
+        }
+
+        if (weight) {
+            user.weight = weight
+        }
+
+        if (healthConditions) {
+            user.healthConditions = healthConditions
+        }
+
+        if (healthGoal) {
+            user.healthGoal = healthGoal
+        }
+
+        if (activityLevel) {
+            user.activityLevel = activityLevel
+        }
+
+        if (user.height && user.weight) {
+            const heightInMeters = user.height / 100;
+            user.bmi = (user.weight / (heightInMeters * heightInMeters)).toFixed(2);
+        }
+
+        await user.save()
+
+        res.status(200).json({ success: true, message: "User updated successfully", user })
     }
     catch (err) {
         console.log(err);
