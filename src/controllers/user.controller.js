@@ -6,7 +6,7 @@ import UserModel from "../models/user.model.js"
 
 export const registerUser = async (req, res) => {
     try {
-        const { name, email, password, height, weight, age, gender } = req.body
+        const { name, email, password } = req.body
 
         const existingUser = await UserModel.findOne({ email })
 
@@ -23,7 +23,7 @@ export const registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, Number(process.env.HASH_ROUND) || 10)
         const verificationToken = crypto.randomBytes(32).toString("hex")
 
-        const newUser = await UserModel.create({ name, email, password: hashedPassword, height, weight, age, gender, verificationToken })
+        const newUser = await UserModel.create({ name, email, password: hashedPassword, verificationToken })
 
         const transporter = nodemailer.createTransport({
             service: "gmail",

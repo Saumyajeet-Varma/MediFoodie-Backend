@@ -47,12 +47,12 @@ const userSchema = new mongoose.Schema({
 
     height: {
         type: Number,     // in cm
-        required: true,
+        default: 0
     },
 
     weight: {
         type: Number,     // in kg
-        required: true,
+        default: 0
     },
 
     activityLevel: {
@@ -96,27 +96,27 @@ const userSchema = new mongoose.Schema({
 //     )
 // }
 
-userSchema.virtual("bmi").get(function () {
+// userSchema.virtual("bmi").get(function () {
 
-    if (this.height && this.weight) {
+//     if (this.height && this.weight) {
 
-        const heightInMeters = this.height / 100
-        const bmi = (this.weight / (heightInMeters * heightInMeters)).toFixed(2)
+//         const heightInMeters = this.height / 100
+//         const bmi = (this.weight / (heightInMeters * heightInMeters)).toFixed(2)
 
-        return bmi
-    }
+//         return bmi
+//     }
 
-    return null
-})
+//     return null
+// })
 
-userSchema.set("toObject", { virtuals: true })
-userSchema.set("toJSON", {
-    virtuals: true,
-    transform: (doc, ret) => {
-        delete ret.password
-        return ret
-    }
-})
+// userSchema.set("toObject", { virtuals: true })
+// userSchema.set("toJSON", {
+//     virtuals: true,
+//     transform: (doc, ret) => {
+//         delete ret.password
+//         return ret
+//     }
+// })
 
 const User = mongoose.model("User", userSchema)
 
